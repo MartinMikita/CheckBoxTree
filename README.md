@@ -1,20 +1,18 @@
 CheckBoxTree
-============
 
 Form Component for Nette framework
 
 
 ##Application
-============
 
-Register to form:
-app/bootstrap.php
+Register to form: Append the following line into the file `app/bootstrap.php`:
 
-\krejcon3\CheckboxTree::register();
+```
+\MartinMikita\CheckboxTree::register();
+```
 
 
 ##Using
-======
 
 ```
 $form->addCheckboxTree(
