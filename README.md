@@ -1,4 +1,4 @@
-CheckBoxTree
+#CheckBoxTree
 
 Form Component for Nette framework
 
