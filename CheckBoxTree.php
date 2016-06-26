@@ -27,7 +27,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace martinmikita;
+namespace MartinMikita;
 
 use Nette,
     Nette\Utils\Html,
@@ -48,20 +48,20 @@ class CheckboxTree extends Nette\Forms\Controls\MultiChoiceControl
         return $this->recursiveRender($this->getItems());
     }
 
-    private function recursiveRender($list)
+    private function recursiveRender($list, $lvl = 0)
     {
         $html = Html::el("ul");
         foreach ($list as $key => $value) {
             if (is_array($value)) {
-                $html->add(Html::el("li")
-                        ->add($this->getControlPart($key))
+                $html->add(Html::el("li", array('class'=>'sub'.$lvl))
+                        ->add($this->getControlPart($key, $lvl))
                         ->add(Html::el("label", array("for" => $this->getHtmlId() . '-' . $key))
                             ->add($key)
                         )
-                        ->add($this->recursiveRender($value)));
+                        ->add($this->recursiveRender($value, $lvl + 1)));
             } else {
-                $html->add(Html::el("li")
-                        ->add($this->getControlPart($key))
+                $html->add(Html::el("li", array('class'=>'sub'.$lvl))
+                        ->add($this->getControlPart($key, $lvl))
                         ->add(Html::el("label", array("for" => $this->getHtmlId() . '-' . $key))
                                 ->add($value)
                         )
@@ -105,7 +105,7 @@ class CheckboxTree extends Nette\Forms\Controls\MultiChoiceControl
         return parent::getLabel($caption)->for(NULL);
     }
 
-    public function getControlPart($key)
+    public function getControlPart($key, $lvl)
     {
         return parent::getControl()->addAttributes(array(
             'id' => $this->getHtmlId() . '-' . $key,
@@ -113,6 +113,7 @@ class CheckboxTree extends Nette\Forms\Controls\MultiChoiceControl
             'disabled' => is_array($this->disabled) ? isset($this->disabled[$key]) : $this->disabled,
             'required' => NULL,
             'value' => $key,
+            'level' => $lvl,
         ));
     }
 
