@@ -79,6 +79,11 @@ class CheckboxTree extends Nette\Forms\Controls\MultiChoiceControl
         return $this;
     }
 
+    private function getHtmlItemId($item)
+    {
+        return $this->getHtmlId() . '-' . str_replace(" ", "_", $item);
+    }
+
     private function recursiveRender($list, $lvl = 0)
     {
         $ulClass = array_merge(['sub'.$lvl], $this->controlClass['list.all']);
@@ -99,7 +104,7 @@ class CheckboxTree extends Nette\Forms\Controls\MultiChoiceControl
             if (is_array($value)) {
                 $html->add(Html::el("li", array('class'=>join(' ', $liClass)))
                         ->add($this->getControlPart($key, $lvl))
-                        ->add(Html::el("label", array("for" => $this->getHtmlId() . '-' . $key))
+                        ->add(Html::el("label", array("for" => $this->getHtmlItemId($key)))
                             ->add($key)
                         )
                         ->add($this->recursiveRender($value, $lvl + 1))
@@ -112,7 +117,7 @@ class CheckboxTree extends Nette\Forms\Controls\MultiChoiceControl
                     $liClassPar = array_merge($liClassPar, $this->controlClass['item.sub.parent']);
                 $html->add(Html::el("li", array('class'=>join(' ', $liClassPar)))
                         ->add($this->getControlPart($key, $lvl))
-                        ->add(Html::el("label", array("for" => $this->getHtmlId() . '-' . $key))
+                        ->add(Html::el("label", array("for" => $this->getHtmlItemId($key)))
                                 ->add($value)
                         )
                 );
@@ -158,18 +163,18 @@ class CheckboxTree extends Nette\Forms\Controls\MultiChoiceControl
     public function getControlPart($key, $lvl)
     {
         return parent::getControl()->addAttributes(array(
-            'id' => $this->getHtmlId() . '-' . $key,
+            'id' => $this->getHtmlItemId($key),
             'checked' => in_array($key, (array)$this->value),
             'disabled' => is_array($this->disabled) ? isset($this->disabled[$key]) : $this->disabled,
             'required' => NULL,
             'value' => $key,
-            'level' => $lvl,
+            'data-level' => $lvl,
         ));
     }
 
     public function getLabelPart($key)
     {
-        return parent::getLabel($this->items[$key])->for($this->getHtmlId() . '-' . $key);
+        return parent::getLabel($this->items[$key])->for($this->getHtmlItemId($key));
     }
 
     public function getSelectedItems()
