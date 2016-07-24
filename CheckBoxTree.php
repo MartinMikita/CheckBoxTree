@@ -36,11 +36,23 @@ use Nette,
 
 class CheckboxTree extends Nette\Forms\Controls\MultiChoiceControl
 {
+    private $controlClass;
 
     public function __construct($label = NULL, array $items = NULL)
     {
         parent::__construct($label, $items);
         $this->control->type = 'checkbox';
+        $this->controlClass = [
+            'list.all' => [],
+            'list.main' => [],
+            'list.sub' => [],
+            'item.all' => [],
+            'item.main' => [],
+            'item.sub' => [],
+            'item.parent' => [],
+            'item.main.parent' => [],
+            'item.sub.parent' => [],
+        ];
     }
 
     public function getControl()
@@ -48,19 +60,57 @@ class CheckboxTree extends Nette\Forms\Controls\MultiChoiceControl
         return $this->recursiveRender($this->getItems());
     }
 
+    public function setControlClass($type, $class)
+    {
+        if ($type == 'list')
+            $type = 'list.all';
+        if ($type == 'item')
+            $type = 'item.all';
+        $this->controlClass[$type] = [$class];
+        return $this;
+    }
+    public function addControlClass($type, $class)
+    {
+        if ($type == 'list')
+            $type = 'list.all';
+        if ($type == 'item')
+            $type = 'item.all';
+        $this->controlClass[$type][] = $class;
+        return $this;
+    }
+
     private function recursiveRender($list, $lvl = 0)
     {
-        $html = Html::el("ul");
+        $ulClass = array_merge(['sub'.$lvl], $this->controlClass['list.all']);
+        if ($lvl == 0) {
+            $ulClass = array_merge($ulClass, $this->controlClass['list.main']);
+        }
+        else {
+            $ulClass = array_merge($ulClass, $this->controlClass['list.sub']);
+        }
+        $liClass = array_merge(['sub'.$lvl], $this->controlClass['item.all']);
+        if ($lvl == 0)
+            $liClass = array_merge($liClass, $this->controlClass['item.main']);
+        else
+            $liClass = array_merge($liClass, $this->controlClass['item.sub']);
+
+        $html = Html::el("ul", array('class'=>join(' ', $ulClass)));
         foreach ($list as $key => $value) {
             if (is_array($value)) {
-                $html->add(Html::el("li", array('class'=>'sub'.$lvl))
+                $html->add(Html::el("li", array('class'=>join(' ', $liClass)))
                         ->add($this->getControlPart($key, $lvl))
                         ->add(Html::el("label", array("for" => $this->getHtmlId() . '-' . $key))
                             ->add($key)
                         )
-                        ->add($this->recursiveRender($value, $lvl + 1)));
+                        ->add($this->recursiveRender($value, $lvl + 1))
+                );
             } else {
-                $html->add(Html::el("li", array('class'=>'sub'.$lvl))
+                $liClassPar = array_merge($liClass, $this->controlClass['item.parent']);
+                if ($lvl == 0)
+                    $liClassPar = array_merge($liClassPar, $this->controlClass['item.main.parent']);
+                else
+                    $liClassPar = array_merge($liClassPar, $this->controlClass['item.sub.parent']);
+                $html->add(Html::el("li", array('class'=>join(' ', $liClassPar)))
                         ->add($this->getControlPart($key, $lvl))
                         ->add(Html::el("label", array("for" => $this->getHtmlId() . '-' . $key))
                                 ->add($value)
